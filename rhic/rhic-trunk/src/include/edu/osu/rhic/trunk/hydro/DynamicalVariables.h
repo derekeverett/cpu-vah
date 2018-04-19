@@ -10,9 +10,9 @@
 
 #define NUMBER_CONSERVATION_LAWS 4
 
-//#define PIMUNU
-//#define W_TZ_MU 
-//#define PI
+#define PIMUNU
+#define W_TZ_MU 
+#define PI
 
 /*********************************************************/
 #ifndef PI
