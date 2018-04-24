@@ -191,7 +191,7 @@ void setInitialTmunuFromFiles(void * latticeParams, void * initCondParams, void 
                     fscanf(fileIn, "%f %f %f %f\n", &x, &y, &z, &value);
                     int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                     u->ut[s] =  (PRECISION) value;
-                    //up->ut[s] = (PRECISION) value; //There is no host variable up unlike cpu-vh. This is accomplished in copyHostToDeviceMemory()
+                    up->ut[s] = (PRECISION) value;
                 }
             }
         }
@@ -213,7 +213,7 @@ void setInitialTmunuFromFiles(void * latticeParams, void * initCondParams, void 
                     fscanf(fileIn, "%f %f %f %f\n", &x, &y, &z, &value);
                     int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                     u->ux[s] =  (PRECISION) value;
-                    //up->ux[s] = (PRECISION) value; //There is no host variable up unlike cpu-vh.  This is accomplished in copyHostToDeviceMemory()
+                    up->ux[s] = (PRECISION) value;
                 }
             }
         }
@@ -235,7 +235,7 @@ void setInitialTmunuFromFiles(void * latticeParams, void * initCondParams, void 
                     fscanf(fileIn, "%f %f %f %f\n", &x, &y, &z, &value);
                     int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                     u->uy[s] =  (PRECISION) value;
-                    //up->uy[s] = (PRECISION) value; //There is no host variable up unlike cpu-vh.  This is accomplished in copyHostToDeviceMemory()
+                    up->uy[s] = (PRECISION) value;
                 }
             }
         }
@@ -257,7 +257,7 @@ void setInitialTmunuFromFiles(void * latticeParams, void * initCondParams, void 
                     fscanf(fileIn, "%f %f %f %f\n", &x, &y, &z, &value);
                     int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                     u->un[s] =  (PRECISION) value;
-                    //up->un[s] = (PRECISION) value; //There is no host variable up unlike cpu-vh.  This is accomplished in copyHostToDeviceMemory()
+                    up->un[s] = (PRECISION) value;
                 }
             }
         }
