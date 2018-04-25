@@ -29,10 +29,10 @@
 #include "edu/osu/rhic/trunk/hydro/AnisotropicDistributionFunctions.h"
 
 /**************************************************************************************************************************************************/
-void setNeighborCellsJK2(const PRECISION * const __restrict__ in, PRECISION * const __restrict__ out, 
+void setNeighborCellsJK2(const PRECISION * const __restrict__ in, PRECISION * const __restrict__ out,
 int s, int ptr, int smm, int sm, int sp, int spp
 ) {
-	PRECISION data_ns = in[s];		
+	PRECISION data_ns = in[s];
 	*(out + ptr		) = in[smm];
 	*(out + ptr + 1) = in[sm];
 	*(out + ptr + 2) = data_ns;
@@ -40,12 +40,14 @@ int s, int ptr, int smm, int sm, int sp, int spp
 	*(out + ptr + 4) = in[spp];
 }
 
-void eulerStepKernelSource(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
+void eulerStepKernelSource(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
 const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz, PRECISION etabar
 ) {
+	//#pragma omp parallel for simd collapse(3)
+	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -121,13 +123,15 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION d
 	}
 }
 
-void eulerStepKernelX(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
-const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up, 
+void eulerStepKernelX(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
+const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz,
 double *fTSol
 ) {
+	//#pragma omp parallel for simd collapse(3)
+	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -188,7 +192,7 @@ double *fTSol
 
 				if(status1==0 && status2==0) fTSol[s]=0.0;
 				else fTSol[s]=1.0;
-	
+
 #ifndef IDEAL
 				loadSourceTermsX(I, H, u, s, dx);
 				for (unsigned int n = 0; n < NUMBER_CONSERVATION_LAWS; ++n) {
@@ -199,7 +203,7 @@ double *fTSol
 				for (unsigned int n = 0; n < NUMBER_CONSERVATION_LAWS; ++n) {
 					*(result+n) *= dt;
 				}
-#endif	
+#endif
 				for (unsigned int n = NUMBER_CONSERVATION_LAWS; n < NUMBER_CONSERVED_VARIABLES; ++n) {
 					*(result+n) *= dt;
 				}
@@ -235,13 +239,15 @@ double *fTSol
 	}
 }
 
-void eulerStepKernelY(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
-const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up, 
+void eulerStepKernelY(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
+const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz,
 double *fTSol
 ) {
+	//#pragma omp parallel for simd collapse(3)
+	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -258,7 +264,7 @@ double *fTSol
 				int sjmm = sjm-ncx;
 				int sjp = s+ncx;
 				int sjpp = sjp+ncx;
-	
+
 				int ptr=0;
 				setNeighborCellsJK2(currrentVars->ttt,J,s,ptr,sjmm,sjm,sjp,sjpp); ptr+=5;
 				setNeighborCellsJK2(currrentVars->ttx,J,s,ptr,sjmm,sjm,sjp,sjpp); ptr+=5;
@@ -349,12 +355,14 @@ double *fTSol
 	}
 }
 
-void eulerStepKernelZ(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
-const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up, 
+void eulerStepKernelZ(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
+const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz
 ) {
+	//#pragma omp parallel for simd collapse(3)
+	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -372,7 +380,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION d
 				int skmm = skm-stride;
 				int skp = s+stride;
 				int skpp = skp+stride;
-	
+
 				int ptr=0;
 				setNeighborCellsJK2(currrentVars->ttt,K,s,ptr,skmm,skm,skp,skpp); ptr+=5;
 				setNeighborCellsJK2(currrentVars->ttx,K,s,ptr,skmm,skm,skp,skpp); ptr+=5;
@@ -465,6 +473,8 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION d
 void convexCombinationEulerStepKernel(const CONSERVED_VARIABLES * const __restrict__ q, CONSERVED_VARIABLES * const __restrict__ Q,
 int ncx, int ncy, int ncz
 ) {
+	//#pragma omp parallel for simd collapse(3)
+	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -521,14 +531,16 @@ int ncx, int ncy, int ncz
 }
 
 /**************************************************************************************************************************************************/
-void 
-regulateDissipativeCurrents(PRECISION t, 
-CONSERVED_VARIABLES * const __restrict__ currrentVars, 
+void
+regulateDissipativeCurrents(PRECISION t,
+CONSERVED_VARIABLES * const __restrict__ currrentVars,
 PRECISION * const __restrict__ e, PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u,
 int ncx, int ncy, int ncz, PRECISION dx, PRECISION dy, PRECISION dz,
 VALIDITY_DOMAIN * const __restrict__ validityDomain
 ) {
+	//#pragma omp parallel for simd collapse(3)
+	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -613,7 +625,7 @@ rhomax=1.0;
 				PRECISION piz1 = z0*pitx-t2*z3*pixn;
 				PRECISION piz2 = z0*pity-t2*z3*piyn;
 				PRECISION piz3 = z0*pitn-t2*z3*pinn;
-		
+
 				PRECISION a1 = spipi/rhomax/sTrsTrs;
 				PRECISION den = xi0*rhomax*spipi;
 /*
@@ -698,7 +710,7 @@ rhomax=1.0;
 				PRECISION WtTz = currrentVars->WtTz[s];
 				PRECISION WxTz = currrentVars->WxTz[s];
 				PRECISION WyTz = currrentVars->WyTz[s];
-				PRECISION WnTz = currrentVars->WnTz[s];	
+				PRECISION WnTz = currrentVars->WnTz[s];
 
 				double WW = WtTz*WtTz-WxTz*WxTz-WyTz*WyTz-t2*WnTz*WnTz;
 				WW = -2*(WtTz*WtTz-WxTz*WxTz-WyTz*WyTz-t2*WnTz*WnTz);
@@ -735,8 +747,8 @@ rhomax=1.0;
 }
 /**************************************************************************************************************************************************/
 
-void 
-rungeKutta2(PRECISION t, PRECISION dt, CONSERVED_VARIABLES * __restrict__ q, CONSERVED_VARIABLES * __restrict__ Q, 
+void
+rungeKutta2(PRECISION t, PRECISION dt, CONSERVED_VARIABLES * __restrict__ q, CONSERVED_VARIABLES * __restrict__ Q,
 void * latticeParams, void * hydroParams
 ) {
 	struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
@@ -782,7 +794,7 @@ void * latticeParams, void * hydroParams
 	convexCombinationEulerStepKernel(q, Q, ncx, ncy, ncz);
 
 	swapFluidVelocity(&up, &u);
-	setInferredVariablesKernel(Q, e, p, up, u, t, latticeParams, fTSol_2);	
+	setInferredVariablesKernel(Q, e, p, up, u, t, latticeParams, fTSol_2);
 
 	regulateDissipativeCurrents(t, Q, e, p, u, ncx, ncy, ncz, dx, dy, dz, validityDomain);
 
@@ -790,4 +802,3 @@ void * latticeParams, void * hydroParams
 
 	checkValidity(t, validityDomain, q, e, p, u, up, ncx, ncy, ncz, etabar, dt, dx, dy, dz);
 }
-

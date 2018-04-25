@@ -5,12 +5,12 @@
  *      Author: bazow
  */
 
-#include "gtest/gtest.h"
+//#include "gtest/gtest.h"
 #include <libconfig.h>
 #include <unistd.h>
 
 #include "edu/osu/rhic/harness/lattice/LatticeParameters.h"
-
+/*
 TEST(loadLatticeParameters, LatticeParametersFromConfFile) {
 	struct LatticeParameters params;
 	config_t config;
@@ -51,3 +51,4 @@ TEST(loadLatticeParameters, DefaultLatticeParameters) {
 	EXPECT_EQ(0.01, params.latticeSpacingProperTime);
 }
 
+*/
