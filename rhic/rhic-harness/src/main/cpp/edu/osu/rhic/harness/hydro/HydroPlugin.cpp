@@ -41,44 +41,44 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
 //	output(a->xi, t, outputDir, "xi", latticeParams);
 	output(u->ux, t, outputDir, "ux", latticeParams);
 	output(u->uy, t, outputDir, "uy", latticeParams);
-	output(u->un, t, outputDir, "un", latticeParams);
+	//output(u->un, t, outputDir, "un", latticeParams);
 	output(u->ut, t, outputDir, "ut", latticeParams);
 //	output(q->ttt, t, outputDir, "ttt", latticeParams);
 //	output(q->ttx, t, outputDir, "ttx", latticeParams);
 //	output(q->tty, t, outputDir, "tty", latticeParams);
 //	output(q->ttn, t, outputDir, "ttn", latticeParams);
 	output(q->pl, t, outputDir, "pl", latticeParams);
-	output(validityDomain->knudsenNumberTaupiT, t, outputDir, "knTaupiT", latticeParams);
-	output(validityDomain->knudsenNumberTaupiL, t, outputDir, "knTaupiL", latticeParams);
-	output(validityDomain->knudsenNumberTaupi, t, outputDir, "knTaupi", latticeParams);
-	output(validityDomain->regulations, t, outputDir, "regulations", latticeParams);
+	//output(validityDomain->knudsenNumberTaupiT, t, outputDir, "knTaupiT", latticeParams);
+	//output(validityDomain->knudsenNumberTaupiL, t, outputDir, "knTaupiL", latticeParams);
+	//output(validityDomain->knudsenNumberTaupi, t, outputDir, "knTaupi", latticeParams);
+	//output(validityDomain->regulations, t, outputDir, "regulations", latticeParams);
 //
-	output(validityDomain->regMag, t, outputDir, "regMag", latticeParams);
-	output(validityDomain->regTr, t, outputDir, "regTr", latticeParams);
-	output(validityDomain->regU0, t, outputDir, "regU0", latticeParams);
-	output(validityDomain->regU1, t, outputDir, "regU1", latticeParams);
-	output(validityDomain->regU2, t, outputDir, "regU2", latticeParams);
-	output(validityDomain->regU3, t, outputDir, "regU3", latticeParams);
-	output(validityDomain->regZ0, t, outputDir, "regZ0", latticeParams);
-	output(validityDomain->regZ1, t, outputDir, "regZ1", latticeParams);
-	output(validityDomain->regZ2, t, outputDir, "regZ2", latticeParams);
-	output(validityDomain->regZ3, t, outputDir, "regZ3", latticeParams);
+	//output(validityDomain->regMag, t, outputDir, "regMag", latticeParams);
+	//output(validityDomain->regTr, t, outputDir, "regTr", latticeParams);
+	//output(validityDomain->regU0, t, outputDir, "regU0", latticeParams);
+	//output(validityDomain->regU1, t, outputDir, "regU1", latticeParams);
+	//output(validityDomain->regU2, t, outputDir, "regU2", latticeParams);
+	//output(validityDomain->regU3, t, outputDir, "regU3", latticeParams);
+	//output(validityDomain->regZ0, t, outputDir, "regZ0", latticeParams);
+	//output(validityDomain->regZ1, t, outputDir, "regZ1", latticeParams);
+	//output(validityDomain->regZ2, t, outputDir, "regZ2", latticeParams);
+	//output(validityDomain->regZ3, t, outputDir, "regZ3", latticeParams);
 //
-	output(validityDomain->stt, t, outputDir, "stt", latticeParams);
-	output(validityDomain->sxx, t, outputDir, "sxx", latticeParams);
-	output(validityDomain->syy, t, outputDir, "syy", latticeParams);
-	output(validityDomain->snn, t, outputDir, "snn", latticeParams);
-	output(validityDomain->taupi, t, outputDir, "taupi", latticeParams);
-	output(validityDomain->dxux, t, outputDir, "dxux", latticeParams);
-	output(validityDomain->dyuy, t, outputDir, "dyuy", latticeParams);
-	output(validityDomain->theta, t, outputDir, "theta", latticeParams);
+	//output(validityDomain->stt, t, outputDir, "stt", latticeParams);
+	//output(validityDomain->sxx, t, outputDir, "sxx", latticeParams);
+	//output(validityDomain->syy, t, outputDir, "syy", latticeParams);
+	//output(validityDomain->snn, t, outputDir, "snn", latticeParams);
+	//output(validityDomain->taupi, t, outputDir, "taupi", latticeParams);
+	//output(validityDomain->dxux, t, outputDir, "dxux", latticeParams);
+	//output(validityDomain->dyuy, t, outputDir, "dyuy", latticeParams);
+	//output(validityDomain->theta, t, outputDir, "theta", latticeParams);
 //	output(validityDomain->fTSolution, t, outputDir, "fTSolution", latticeParams);
-	output(fTSol_X1, t, outputDir, "fTSol_X1", latticeParams);
-	output(fTSol_Y1, t, outputDir, "fTSol_Y1", latticeParams);
-	output(fTSol_1, t, outputDir, "fTSol_1", latticeParams);
-	output(fTSol_X2, t, outputDir, "fTSol_X2", latticeParams);
-	output(fTSol_Y2, t, outputDir, "fTSol_Y2", latticeParams);
-	output(fTSol_2, t, outputDir, "fTSol_2", latticeParams);
+	//output(fTSol_X1, t, outputDir, "fTSol_X1", latticeParams);
+	//output(fTSol_Y1, t, outputDir, "fTSol_Y1", latticeParams);
+	//output(fTSol_1, t, outputDir, "fTSol_1", latticeParams);
+	//output(fTSol_X2, t, outputDir, "fTSol_X2", latticeParams);
+	//output(fTSol_Y2, t, outputDir, "fTSol_Y2", latticeParams);
+	//output(fTSol_2, t, outputDir, "fTSol_2", latticeParams);
 #ifdef PIMUNU
 	output(q->pixx, t, outputDir, "pixx", latticeParams);
 	output(q->pixy, t, outputDir, "pixy", latticeParams);
@@ -92,20 +92,20 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
 	output(q->pitn, t, outputDir, "pitn", latticeParams);
 	output(q->pinn, t, outputDir, "pinn", latticeParams);
 	output(validityDomain->Rpi, t, outputDir, "Rpi", latticeParams);
-	output(validityDomain->Rpi2, t, outputDir, "Rpi2", latticeParams);
+	//output(validityDomain->Rpi2, t, outputDir, "Rpi2", latticeParams);
 #endif
 #ifdef W_TZ_MU
-	output(q->WtTz, t, outputDir, "WtTz", latticeParams);
-	output(q->WxTz, t, outputDir, "WxTz", latticeParams);
-	output(q->WyTz, t, outputDir, "WyTz", latticeParams);
-	output(q->WnTz, t, outputDir, "WnTz", latticeParams);
-	output(validityDomain->Rw, t, outputDir, "Rw", latticeParams);
+	//output(q->WtTz, t, outputDir, "WtTz", latticeParams);
+	//output(q->WxTz, t, outputDir, "WxTz", latticeParams);
+	//output(q->WyTz, t, outputDir, "WyTz", latticeParams);
+	//output(q->WnTz, t, outputDir, "WnTz", latticeParams);
+	//output(validityDomain->Rw, t, outputDir, "Rw", latticeParams);
 #endif
 #ifdef PI
 	output(q->Pi, t, outputDir, "Pi", latticeParams);
-	output(validityDomain->knudsenNumberTauPi, t, outputDir, "knTauPi", latticeParams);
+	//output(validityDomain->knudsenNumberTauPi, t, outputDir, "knTauPi", latticeParams);
 	output(validityDomain->RPi, t, outputDir, "RPi", latticeParams);
-	output(validityDomain->RPi2, t, outputDir, "RPi2", latticeParams);
+	//output(validityDomain->RPi2, t, outputDir, "RPi2", latticeParams);
 #endif
 //*/
 }

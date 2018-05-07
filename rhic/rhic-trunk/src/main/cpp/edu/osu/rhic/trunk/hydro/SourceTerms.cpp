@@ -18,6 +18,10 @@
 #include "edu/osu/rhic/trunk/eos/EquationOfState.h" // for bulk terms
 #include "edu/osu/rhic/trunk/hydro/AnisotropicDistributionFunctions.h"
 
+#include "edu/osu/rhic/core/muscl/FluxLimiter.h"
+
+#define USE_APPROX_DERIVATIVE //use approximate derivative with minmod flux limiter for derivatives of primary variables and pi^munu
+
 // paramters for the analytic parameterization of the bulk viscosity \zeta/S
 #define A_1 -13.77
 #define A_2 27.55
@@ -39,7 +43,7 @@ inline PRECISION bulkViscosityToEntropyDensity(PRECISION T) {
 		return LAMBDA_1*exp(-(x-1)/SIGMA_1) + LAMBDA_2*exp(-(x-1)/SIGMA_2)+0.001;
 	else if(x < 0.995)
 		return LAMBDA_3*exp((x-1)/SIGMA_3)+ LAMBDA_4*exp((x-1)/SIGMA_4)+0.03;
-	else 
+	else
 		return A_1*x*x + A_2*x - A_3;
 }
 
@@ -49,6 +53,9 @@ PRECISION d_dx
 	//=========================================================
 	// spatial derivatives of the conserved variables \pi^{\mu\nu}
 	//=========================================================
+
+	#ifndef USE_APPROX_DERIVATIVE
+
 	PRECISION facX = 1 / d_dx / 2;
 	int ptr = 25; // 5 * n (with n = 4 corresponding to pitt)
 	PRECISION dxpitt = (*(I + ptr + 3) - *(I + ptr + 1)) * facX;
@@ -66,6 +73,26 @@ PRECISION d_dx
 	PRECISION dxpixn = (*(I + ptr + 3) - *(I + ptr + 1)) * facX;
 	ptr += 20;
 
+	#else
+
+	int ptr = 25; // 5 * n (with n = 4 corresponding to pitt)
+	PRECISION dxpitt = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 5;
+	PRECISION dxpitx = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 5;
+	PRECISION dxpity = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 5;
+	PRECISION dxpitn = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 5;
+	PRECISION dxpixx = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 5;
+	PRECISION dxpixy = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 5;
+	PRECISION dxpixn = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	ptr += 20;
+
+	#endif
+
 	PRECISION ut = u->ut[s];
 	PRECISION ux = u->ux[s];
 
@@ -78,7 +105,11 @@ PRECISION d_dx
 	S[1] = dxpitx*vx - dxpixx;
 #else
 	ptr=(NUMBER_CONSERVED_VARIABLES-1)*5;
+	#ifndef USE_APPROX_DERIVATIVE
 	PRECISION dxPi = (*(I + ptr + 3) - *(I + ptr + 1)) * facX;
+	#else
+	PRECISION dxPi = approximateDerivative( *(I + ptr + 1), *(I + ptr + 2), *(I + ptr + 3) )/d_dx;
+	#endif
 	dxPi *= 1.5;
 	S[0] = dxpitt * vx - dxpitx - vx * dxPi;
 	S[1] = dxpitx * vx - dxpixx - dxPi;
@@ -93,6 +124,9 @@ PRECISION d_dy
 	//=========================================================
 	// spatial derivatives of the conserved variables \pi^{\mu\nu}
 	//=========================================================
+
+	#ifndef USE_APPROX_DERIVATIVE
+
 	PRECISION facY = 1 / d_dy / 2;
 	int ptr = 25; // 5 * n (with n = 4 corresponding to pitt)
 	PRECISION dypitt = (*(J + ptr + 3) - *(J + ptr + 1)) * facY;
@@ -110,6 +144,26 @@ PRECISION d_dy
 	PRECISION dypiyn = (*(J + ptr + 3) - *(J + ptr + 1)) * facY;
 	ptr += 10;
 
+	#else
+
+	int ptr = 25; // 5 * n (with n = 4 corresponding to pitt)
+	PRECISION dypitt = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 5;
+	PRECISION dypitx = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 5;
+	PRECISION dypity = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 5;
+	PRECISION dypitn = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 10;
+	PRECISION dypixy = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 10;
+	PRECISION dypiyy = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 5;
+	PRECISION dypiyn = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	ptr += 10;
+
+	#endif
+
 	PRECISION ut = u->ut[s];
 	PRECISION uy = u->uy[s];
 
@@ -122,7 +176,11 @@ PRECISION d_dy
 	S[2] = dypity*vy - dypiyy;
 #else
 	ptr=(NUMBER_CONSERVED_VARIABLES-1)*5;
+	#ifndef USE_APPROX_DERIVATIVE
 	PRECISION dyPi = (*(J + ptr + 3) - *(J + ptr + 1)) * facY;
+	#else
+	PRECISION dyPi = approximateDerivative( *(J + ptr + 1), *(J + ptr + 2), *(J + ptr + 3) )/d_dy;
+	#endif
 	dyPi *= 1.5;
 	S[0] = dypitt * vy - dypity - vy * dyPi;
 	S[2] = dypity * vy - dypiyy - dyPi;
@@ -137,6 +195,9 @@ PRECISION d_dz
 	//=========================================================
 	// spatial derivatives of the conserved variables \pi^{\mu\nu}
 	//=========================================================
+
+	#ifndef USE_APPROX_DERIVATIVE
+
 	PRECISION facZ = 1 / d_dz / 2;
 	int ptr = 25; // 5 * n (with n = 4 corresponding to pitt)
 	PRECISION dnpitt = (*(K + ptr + 3) - *(K + ptr + 1)) * facZ;
@@ -154,6 +215,26 @@ PRECISION d_dz
 	PRECISION dnpinn = (*(K + ptr + 3) - *(K + ptr + 1)) * facZ;
 	ptr += 5;
 
+	#else
+
+	int ptr = 25; // 5 * n (with n = 4 corresponding to pitt)
+	PRECISION dnpitt = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 5;
+	PRECISION dnpitx = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 5;
+	PRECISION dnpity = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 5;
+	PRECISION dnpitn = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 15;
+	PRECISION dnpixn = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 10;
+	PRECISION dnpiyn = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 5;
+	PRECISION dnpinn = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	ptr += 5;
+
+	#endif
+
 	PRECISION ut = u->ut[s];
 	PRECISION un = u->un[s];
 
@@ -166,7 +247,11 @@ PRECISION d_dz
 	S[3] = dnpitn*vn - dnpinn;
 #else
 	ptr=(NUMBER_CONSERVED_VARIABLES-1)*5;
+	#ifndef USE_APPROX_DERIVATIVE
 	PRECISION dnPi = (*(K + ptr + 3) - *(K + ptr + 1)) * facZ;
+	#else
+	PRECISION dnPi = approximateDerivative( *(K + ptr + 1), *(K + ptr + 2), *(K + ptr + 3) )/d_dz;
+	#endif
 	dnPi *= 1.5;
 	S[0] = dnpitt * vn - dnpitn - vn * dnPi;
 	S[3] = dnpitn * vn - dnpinn - dnPi / powf(t, 2);
@@ -177,19 +262,19 @@ PRECISION d_dz
 
 void loadSourceTerms(const PRECISION * const __restrict__ Q, PRECISION * const __restrict__ S, const FLUID_VELOCITY * const __restrict__ u,
 PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp,
-PRECISION t, const PRECISION * const __restrict__ evec, const PRECISION * const __restrict__ pvec, 
+PRECISION t, const PRECISION * const __restrict__ evec, const PRECISION * const __restrict__ pvec,
 int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_etabar, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz,
 int i, int j, int k, double x, double y, double z,
 const CONSERVED_VARIABLES * const __restrict__ currentVars
 ) {
 	//=========================================================
-	// conserved variables	
+	// conserved variables
 	//=========================================================
 	PRECISION ttt = Q[0];
 	PRECISION ttx = Q[1];
 	PRECISION tty = Q[2];
 	PRECISION ttn = Q[3];
-	PRECISION pl = Q[4]; 
+	PRECISION pl = Q[4];
 	// \pi^{\mu\nu}_{\perp}
 #ifdef PIMUNU
 	PRECISION pitt = Q[5];
@@ -240,7 +325,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	PRECISION *uxvec = u->ux;
 	PRECISION *uyvec = u->uy;
 	PRECISION *unvec = u->un;
-	
+
 	PRECISION e = evec[s];
 	PRECISION p = pvec[s];
 	PRECISION ut = utvec[s];
@@ -248,36 +333,122 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	PRECISION uy = uyvec[s];
 	PRECISION un = unvec[s];
 
+	int stride = d_ncx * d_ncy;
+
 	//=========================================================
 	// spatial derivatives of primary variables
 	//=========================================================
 	PRECISION facX = 1/d_dx/2;
 	PRECISION facY = 1/d_dy/2;
 	PRECISION facZ = 1/d_dz/2;
+
+	#ifndef USE_APPROX_DERIVATIVE
+	//use central finite difference
+
 	// dx of u^{\mu} components
 	PRECISION dxut = (*(utvec + s + 1) - *(utvec + s - 1)) * facX;
 	PRECISION dxux = (*(uxvec + s + 1) - *(uxvec + s - 1)) * facX;
 	PRECISION dxuy = (*(uyvec + s + 1) - *(uyvec + s - 1)) * facX;
 	PRECISION dxun = (*(unvec + s + 1) - *(unvec + s - 1)) * facX;
+
 	// dy of u^{\mu} components
 	PRECISION dyut = (*(utvec + s + d_ncx) - *(utvec + s - d_ncx)) * facY;
 	PRECISION dyux = (*(uxvec + s + d_ncx) - *(uxvec + s - d_ncx)) * facY;
 	PRECISION dyuy = (*(uyvec + s + d_ncx) - *(uyvec + s - d_ncx)) * facY;
 	PRECISION dyun = (*(unvec + s + d_ncx) - *(unvec + s - d_ncx)) * facY;
+
 	// dn of u^{\mu} components
-	int stride = d_ncx * d_ncy; 
+	int stride = d_ncx * d_ncy;
 	PRECISION dnut = (*(utvec + s + stride) - *(utvec + s - stride)) * facZ;
 	PRECISION dnux = (*(uxvec + s + stride) - *(uxvec + s - stride)) * facZ;
 	PRECISION dnuy = (*(uyvec + s + stride) - *(uyvec + s - stride)) * facZ;
 	PRECISION dnun = (*(unvec + s + stride) - *(unvec + s - stride)) * facZ;
+
 	// pressure
 	PRECISION dxp = (*(pvec + s + 1) - *(pvec + s - 1)) * facX;
 	PRECISION dyp = (*(pvec + s + d_ncx) - *(pvec + s - d_ncx)) * facY;
 	PRECISION dnp = (*(pvec + s + stride) - *(pvec + s - stride)) * facZ;
-	// pressure
+
+	// energy
 	PRECISION dxe = (*(evec + s + 1) - *(evec + s - 1)) * facX;
 	PRECISION dye = (*(evec + s + d_ncx) - *(evec + s - d_ncx)) * facY;
 	PRECISION dne = (*(evec + s + stride) - *(evec + s - stride)) * facZ;
+
+	#else
+	//use minmod flux limiter to dampen oscillations
+
+	PRECISION e_right =  evec[s+1];
+	PRECISION p_right =  pvec[s+1];
+	PRECISION ut_right = utvec[s+1];
+	PRECISION ux_right = uxvec[s+1];
+	PRECISION uy_right = uyvec[s+1];
+	PRECISION un_right = unvec[s+1];
+
+	PRECISION e_left =  evec[s-1];
+	PRECISION p_left =  pvec[s-1];
+	PRECISION ut_left = utvec[s-1];
+	PRECISION ux_left = uxvec[s-1];
+	PRECISION uy_left = uyvec[s-1];
+	PRECISION un_left = unvec[s-1];
+
+	PRECISION e_top =  evec[s+d_ncx];
+	PRECISION p_top =  pvec[s+d_ncx];
+	PRECISION ut_top = utvec[s+d_ncx];
+	PRECISION ux_top = uxvec[s+d_ncx];
+	PRECISION uy_top = uyvec[s+d_ncx];
+	PRECISION un_top = unvec[s+d_ncx];
+
+	PRECISION e_bottom =  evec[s-d_ncx];
+	PRECISION p_bottom =  pvec[s-d_ncx];
+	PRECISION ut_bottom = utvec[s-d_ncx];
+	PRECISION ux_bottom = uxvec[s-d_ncx];
+	PRECISION uy_bottom = uyvec[s-d_ncx];
+	PRECISION un_bottom = unvec[s-d_ncx];
+
+	PRECISION e_forward =  evec[s+stride];
+	PRECISION p_forward =  pvec[s+stride];
+	PRECISION ut_forward = utvec[s+stride];
+	PRECISION ux_forward = uxvec[s+stride];
+	PRECISION uy_forward = uyvec[s+stride];
+	PRECISION un_forward = unvec[s+stride];
+
+	PRECISION e_backward =  evec[s-stride];
+	PRECISION p_backward =  pvec[s-stride];
+	PRECISION ut_backward = utvec[s-stride];
+	PRECISION ux_backward = uxvec[s-stride];
+	PRECISION uy_backward = uyvec[s-stride];
+	PRECISION un_backward = unvec[s-stride];
+
+	// dx of u^{\mu} components
+	PRECISION dxut = approximateDerivative(ut_left, ut, ut_right) / d_dx;
+	PRECISION dxux = approximateDerivative(ux_left, ux, ux_right) / d_dx;
+	PRECISION dxuy = approximateDerivative(uy_left, uy, uy_right) / d_dx;
+	PRECISION dxun = approximateDerivative(un_left, un, un_right) / d_dx;
+
+	// dy of u^{\mu} components
+	PRECISION dyut = approximateDerivative(ut_bottom, ut, ut_top) / d_dy;
+	PRECISION dyux = approximateDerivative(ux_bottom, ux, ux_top) / d_dy;
+	PRECISION dyuy = approximateDerivative(uy_bottom, uy, uy_top) / d_dy;
+	PRECISION dyun = approximateDerivative(un_bottom, un, un_top) / d_dy;
+
+	//dn of u^{\mu} components
+	PRECISION dnut = approximateDerivative(ut_backward, ut, ut_forward) / d_dz;
+	PRECISION dnux = approximateDerivative(ux_backward, ux, ux_forward) / d_dz;
+	PRECISION dnuy = approximateDerivative(uy_backward, uy, uy_forward) / d_dz;
+	PRECISION dnun = approximateDerivative(un_backward, un, un_forward) / d_dz;
+
+	// pressure
+	PRECISION dxp = approximateDerivative(p_left, p, p_right) / d_dx;
+	PRECISION dyp = approximateDerivative(p_bottom, p, p_top) / d_dy;
+	PRECISION dnp = approximateDerivative(p_backward, p, p_forward) / d_dz;
+
+	// energy
+	PRECISION dxe = approximateDerivative(e_left, e, e_right) / d_dx;
+	PRECISION dye = approximateDerivative(e_bottom, e, e_top) / d_dy;
+	PRECISION dne = approximateDerivative(e_backward, e, e_forward) / d_dz;
+
+	#endif
+
 
 	//=========================================================
 	// Deriviatives of v
@@ -299,7 +470,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	 * Gradient terms of the fluid velocity
 	/************************************************************************************/
 	// time derivatives of u
-	PRECISION dtut = (ut - utp) / d_dt;	
+	PRECISION dtut = (ut - utp) / d_dt;
 	PRECISION dtux = (ux - uxp) / d_dt;
 	PRECISION dtuy = (uy - uyp) / d_dt;
 	PRECISION dtun = (un - unp) / d_dt;
@@ -340,7 +511,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	PRECISION wxy = (dyux - dxuy) / 2 + (uy * dux - ux * duy) / 2;
 	PRECISION wxn = (dnux - t2 * dxun) / 2 + (t2 * un * dux - ux * Dun) / 2;
 	PRECISION wyn = (dnuy - t2 * dyun) / 2 + (t2 * un * duy - uy * Dun) / 2;
-	// anti-symmetric vorticity components 
+	// anti-symmetric vorticity components
 	PRECISION wxt = wtx;
 	PRECISION wyt = wty;
 	PRECISION wnt = wtn / t2;
@@ -448,36 +619,36 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	double a14 = a13*a;
 	double a15 = a14*a;
 
-	PRECISION Rtilde = (-6.674731906076046e-6 + 0.004617789933500251*a + 0.7207562721999754*a2 + 9.097427250602184*a3 - 4.475814747302824*a4 - 36.37501529319408*a5 + 
+	PRECISION Rtilde = (-6.674731906076046e-6 + 0.004617789933500251*a + 0.7207562721999754*a2 + 9.097427250602184*a3 - 4.475814747302824*a4 - 36.37501529319408*a5 +
      46.868405146729316*a6 - 15.833867583743228*a7)/
-   (0.06856675185266 + 2.9181587012768597*a + 11.951184087839218*a2 - 29.708257843442173*a3 - 2.618233802059826*a4 + 34.646239784689065*a5 - 
+   (0.06856675185266 + 2.9181587012768597*a + 11.951184087839218*a2 - 29.708257843442173*a3 - 2.618233802059826*a4 + 34.646239784689065*a5 -
      19.62596366454439*a6 + 2.374808442453899*a7);
 
-	PRECISION Rhat = (0.0024792827625583747 + 1.943027171680747*a + 53.46970495217282*a2 + 19.989171951866325*a3 - 347.1285593126723*a4 + 412.2647882672885*a5 - 
-     140.53693383827797*a6)/(0.5061402347582388 + 29.466067530916984*a + 126.07947638942892*a2 - 334.420268508072*a3 + 86.57706367583984*a4 + 
+	PRECISION Rhat = (0.0024792827625583747 + 1.943027171680747*a + 53.46970495217282*a2 + 19.989171951866325*a3 - 347.1285593126723*a4 + 412.2647882672885*a5 -
+     140.53693383827797*a6)/(0.5061402347582388 + 29.466067530916984*a + 126.07947638942892*a2 - 334.420268508072*a3 + 86.57706367583984*a4 +
      183.53625188578846*a5 - 91.68259808111912*a6);
 
-	PRECISION Rbar0 = (0.015267955823446243 + 7.725572805021035*a + 421.0063884634789*a2 + 3422.877939650926*a3 - 5785.670846299543*a4 - 12261.66452089229*a5 + 
+	PRECISION Rbar0 = (0.015267955823446243 + 7.725572805021035*a + 421.0063884634789*a2 + 3422.877939650926*a3 - 5785.670846299543*a4 - 12261.66452089229*a5 +
      31491.409484673808*a6 - 22737.05146992673*a7 + 5441.373392185447*a8)/
-   (0.05470696094814806 + 14.505878005231883*a + 522.6643024173569*a2 + 2731.7776413939037*a3 - 6161.1991042880445*a4 - 
+   (0.05470696094814806 + 14.505878005231883*a + 522.6643024173569*a2 + 2731.7776413939037*a3 - 6161.1991042880445*a4 -
      3989.4375208972588*a5 + 15008.260526258282*a6 - 10243.036679405379*a7 + 2116.74060159494*a8);
 
-	PRECISION Rgamma = (0.0001373796340585521 - 0.6149634004722385*a + 3.1968875683514253*a2 + 246.35973783799196*a3 - 764.319750320186*a4 + 
+	PRECISION Rgamma = (0.0001373796340585521 - 0.6149634004722385*a + 3.1968875683514253*a2 + 246.35973783799196*a3 - 764.319750320186*a4 +
      834.160165071214*a5 - 371.64955466673234*a6 + 52.87411921963021*a7)/
-   (-1.673322188488071 + 13.343782941396997*a + 561.7566534476223*a2 - 1790.2296622275915*a3 + 1896.4688704912812*a4 - 
+   (-1.673322188488071 + 13.343782941396997*a + 561.7566534476223*a2 - 1790.2296622275915*a3 + 1896.4688704912812*a4 -
      658.7933063369629*a5 - 85.96181900698849*a6 + 65.09739194472589*a7);
 
-	double Rbar0P = (2.473173363908116e-10 - 4.899839370307281e-6*a + 155055.91462124084*a10 - 275435.45350226434*a11 + 350689.68825705117*a12 - 
-     299725.38986957155*a13 + 151477.08809203724*a14 - 33196.47417939176*a15 - 0.004301975027942015*a2 - 0.14858206981041563*a3 + 
-     6.249255189587875*a4 - 92.79641927240235*a5 + 807.175057749925*a6 - 4760.015905266286*a7 + 20324.533122685436*a8 - 
-     64758.869552496515*a9)/(0.00008222793468208523 + 0.03411917870833943*a + 4.895969276094396e6*a10 - 8.84162305829353e6*a11 + 
-     1.1445063656613324e7*a12 - 9.918442713390596e6*a13 + 5.065882388219598e6*a14 - 1.1181016364928822e6*a15 + 0.23871740573818725*a2 - 
-     23.50912574236691*a3 + 417.4953123877312*a4 - 4234.215775452717*a5 + 29824.022790048104*a6 - 157419.8447785501*a7 + 
+	double Rbar0P = (2.473173363908116e-10 - 4.899839370307281e-6*a + 155055.91462124084*a10 - 275435.45350226434*a11 + 350689.68825705117*a12 -
+     299725.38986957155*a13 + 151477.08809203724*a14 - 33196.47417939176*a15 - 0.004301975027942015*a2 - 0.14858206981041563*a3 +
+     6.249255189587875*a4 - 92.79641927240235*a5 + 807.175057749925*a6 - 4760.015905266286*a7 + 20324.533122685436*a8 -
+     64758.869552496515*a9)/(0.00008222793468208523 + 0.03411917870833943*a + 4.895969276094396e6*a10 - 8.84162305829353e6*a11 +
+     1.1445063656613324e7*a12 - 9.918442713390596e6*a13 + 5.065882388219598e6*a14 - 1.1181016364928822e6*a15 + 0.23871740573818725*a2 -
+     23.50912574236691*a3 + 417.4953123877312*a4 - 4234.215775452717*a5 + 29824.022790048104*a6 - 157419.8447785501*a7 +
      641300.6529027821*a8 - 2.0248032895288002e6*a9);
 
-	double R0g1m2031 = (-1.0233483506421896e-7 - 0.005510394233958543*a - 0.5161308003737349*a2 - 4.115511461930346*a3 + 6.378431203946746*a4 + 3.926438723664259*a5 - 
+	double R0g1m2031 = (-1.0233483506421896e-7 - 0.005510394233958543*a - 0.5161308003737349*a2 - 4.115511461930346*a3 + 6.378431203946746*a4 + 3.926438723664259*a5 -
      8.465485699618803*a6 + 2.7925630611642154*a7)/
-   (0.001958161993306958 + 0.22517859370360388*a + 2.883216830325076*a2 + 0.1905363935371778*a3 - 12.192584184275201*a4 + 10.729468548753893*a5 - 
+   (0.001958161993306958 + 0.22517859370360388*a + 2.883216830325076*a2 + 0.1905363935371778*a3 - 12.192584184275201*a4 + 10.729468548753893*a5 -
      0.8635431725599291*a6 - 0.9690254375998808*a7);
 
 	// longitudinal pressure
@@ -488,7 +659,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	PRECISION ptHat = transversePressureHat(e, p, pl);
 	PRECISION pt = ptHat + 1.5*Pi;
 	PRECISION DP = pl-pt;
-
+	if(isnan(pl)) printf("found pl nan \n");
 	// L functions
 	PRECISION Ltt = DP*t2*un2/F;
 	PRECISION Ltn = DP*ut*un/F;
@@ -587,6 +758,18 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	double dnRbar0 = Rbar0P*(dnpl-a*dne)/e;
 	// derivative of transverse pressure
 	PRECISION dxptHat = 0.5*(dxe-dxpl-Rbar0*(dxe-3*dxp)-(e-3*p)*dxRbar0);
+	if (isnan(e)) printf("found e nan \n");
+	if (isnan(p)) printf("found p nan \n");
+	if (isnan(dxe)) printf("found dxe nan \n");
+	if (isnan(dxp)) printf("found dxp nan \n");
+	if (isnan(dxpl)) printf("found dxpl nan \n");
+	if (isnan(dye)) printf("found dye nan \n");
+	if (isnan(dyp)) printf("found dyp nan \n");
+	if (isnan(dypl)) printf("found dypl nan \n");
+	if (isnan(Rbar0)) printf("found Rbar0 nan \n");
+	if (isnan(dxRbar0)) printf("found dxRbar0 nan \n");
+	if (isnan(dyRbar0)) printf("found dyRbar0 nan \n");
+	if (isnan(dnRbar0)) printf("found dnRbar0 nan \n");
 	PRECISION dyptHat = 0.5*(dye-dypl-Rbar0*(dye-3*dyp)-(e-3*p)*dyRbar0);
 	PRECISION dnptHat = 0.5*(dne-dnpl-Rbar0*(dne-3*dnp)-(e-3*p)*dnRbar0);
 
@@ -643,11 +826,11 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 
 	// IL1
 	double IL1 = -(WtTz*B0 - WxTz*B1 - WyTz*B2 - t2*WnTz*B3) + (WtTz*Bw0 - WxTz*Bw1 - WyTz*Bw2 - t2*WnTz*Bw3);
-	// IL2	
+	// IL2
 	double IL2 = (WtTz*B0 - WxTz*B1 - WyTz*B2 - t2*WnTz*B3) + (WtTz*Bw0 - WxTz*Bw1 - WyTz*Bw2 - t2*WnTz*Bw3);
 	// IL3
 	double IL3 = psT;
-	// IL	
+	// IL
 	double IL = lambda_lWu * IL1 - lambda_lWT * IL2 - lambda_lpi * IL3;
 //	IL=0;
 
@@ -675,14 +858,14 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	}
 
 	/************************************************************************************\
-	 * T^{\mu\nu} source terms 
+	 * T^{\mu\nu} source terms
 	/************************************************************************************/
 	double Htt = Ltt+Wtt+pitt;
-	S[0] = -(ttt / t + t * tnn) + dkvk * (Htt - pt) - vx * dxptHat - vy * dyptHat - vn * dnptHat 
+	S[0] = -(ttt / t + t * tnn) + dkvk * (Htt - pt) - vx * dxptHat - vy * dyptHat - vn * dnptHat
 				+ vx*(dxLtt+dxWtt)-dxWtx + vy*(dyLtt+dyWtt)-dyWty + vn*(dnLtt+dnWtt)-dnLtn-dnWtn;
 	S[1] = -ttx / t - dxptHat + dkvk * (Wtx + pitx) + vx*dxWtx + vy*dyWtx + vn*dnWtx - dnWxn;
 	S[2] = -tty / t - dyptHat + dkvk * (Wty + pity) + vx*dxWty + vy*dyWty + vn*dnWty - dnWyn;
-	S[3] = -3 * ttn / t - dnptHat / t2 + dkvk * (Ltn + Wtn + pitn) 
+	S[3] = -3 * ttn / t - dnptHat / t2 + dkvk * (Ltn + Wtn + pitn)
 				+ vx*(dxLtn+dxWtn)-dxWxn + vy*(dyLtn+dyWtn)-dyWyn + vn*(dnLtn+dnLtn)-dnLnn-dnWnn;
 
 	if(isnan(S[0])) {
@@ -719,7 +902,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	}
 
 	/************************************************************************************\
-	 * \pi^{\mu\nu}_\perp source terms 
+	 * \pi^{\mu\nu}_\perp source terms
 	/************************************************************************************/
 #ifdef PIMUNU
 	double etaBar_TC = ((3-Rtilde)*e-2*pl)/8;
@@ -894,7 +1077,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	I7yn = 0;
 	I7nn = 0;
 //*/
-	
+
 
 	PRECISION Itt = I1tt - delta_pipi * I2tt + tau_pipi * I4tt - lambda_pipi * I5tt + lambda_piWu * I6tt - lambda_piWT * I7tt - lambda_piPi * Pi * sttT;
 	PRECISION Itx = I1tx - delta_pipi * I2tx + tau_pipi * I4tx - lambda_pipi * I5tx + lambda_piWu * I6tx - lambda_piWT * I7tx - lambda_piPi * Pi * sttT;
@@ -930,7 +1113,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	S[14] = dpinn / ut + pinn * dkvk;
 #endif
 	/************************************************************************************\
-	 * W^{\mu}_{\perp z} source terms 
+	 * W^{\mu}_{\perp z} source terms
 	/************************************************************************************/
 #ifdef W_TZ_MU
 	double etaWu = zeta_zT/2.;
@@ -996,7 +1179,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	double J2t = B0+z0*A+Bw0;
 	double J2x = B1+Bw1;
 	double J2y = B2+Bw2;
-	double J2n = B3+z3*A+Bw3;	
+	double J2n = B3+z3*A+Bw3;
 
 	double Jt = 2*(etaWu * J1t - etaWT * J2t);
 	double Jx = 2*(etaWu * J1x - etaWT * J2x);
@@ -1024,7 +1207,7 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	S[18] = dWnTz / ut + WnTz * dkvk;
 #endif
 	/************************************************************************************\
-	 * \Pi source terms 
+	 * \Pi source terms
 	/************************************************************************************/
 #ifdef PI
 	PRECISION b = 1.0/3.0 - cs2;
@@ -1037,9 +1220,14 @@ const CONSERVED_VARIABLES * const __restrict__ currentVars
 	double zeta_T = -(Rbar0+Rhat)*(e-3*p)/6;
 
 //	PRECISION dPi = -((1-Rbar0)*(e-3*p)/3+Pi)*tauPiInv - zeta_z*zDzu -zeta_T*thetaT;
-	PRECISION dPi = -((1-Rbar0)*(e-3*p)/3+Pi)*tauPiInv - zeta_z*zDzu -zeta_T*thetaT - beta_PiPi * Pi * zDzu - delta_PiPi * Pi * thetaT + lambda_Pipi * ps;
 
+	PRECISION dPi;
+
+	#ifndef PIMUNU
+	dPi = -((1-Rbar0)*(e-3*p)/3+Pi)*tauPiInv - zeta_z*zDzu -zeta_T*thetaT - beta_PiPi * Pi * zDzu - delta_PiPi * Pi * thetaT;
+	#else
+	dPi = -((1-Rbar0)*(e-3*p)/3+Pi)*tauPiInv - zeta_z*zDzu -zeta_T*thetaT - beta_PiPi * Pi * zDzu - delta_PiPi * Pi * thetaT + lambda_Pipi * ps;
+	#endif
 	S[NUMBER_CONSERVED_VARIABLES-1] = dPi / ut + Pi * dkvk;
 #endif
 }
-

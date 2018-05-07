@@ -220,10 +220,12 @@ void checkValidityKernel(PRECISION t, const VALIDITY_DOMAIN * const __restrict__
 		v->knudsenNumberTaupiT[s] = 5 * d_etabar * fabs(thetaT) / T;
 		v->knudsenNumberTaupiL[s] = 5 * d_etabar * fabs(zDzu) / T;
 		v->knudsenNumberTaupi[s] = 5 * d_etabar * fabs(theta) / T;
-#ifdef PIMUNU		
-		// inverse reynolds number	
-		PRECISION pl = currrentVars->pl[s];	
 
+		PRECISION pl = currrentVars->pl[s];	
+		double ptHat = transversePressureHat(e_s, p_s, pl);
+
+#ifdef PIMUNU		
+		// inverse reynolds number
 		PRECISION pitt = currrentVars->pitt[s];
 		PRECISION pitx = currrentVars->pitx[s];
 		PRECISION pity = currrentVars->pity[s];
@@ -238,7 +240,7 @@ void checkValidityKernel(PRECISION t, const VALIDITY_DOMAIN * const __restrict__
 		PRECISION pipi = pitt * pitt - 2 * pitx * pitx - 2 * pity * pity + pixx * pixx + 2 * pixy * pixy + piyy * piyy - 2 * pitn * pitn * t2
 				+ 2 * pixn * pixn * t2 + 2 * piyn * piyn * t2 + pinn * pinn * t2 * t2;
 
-		double ptHat = transversePressureHat(e_s, p_s, pl);
+
 
 		v->Rpi[s] = sqrt(fabs(pipi))/fabs(ptHat);
 #endif
@@ -272,7 +274,7 @@ void checkValidityKernel(PRECISION t, const VALIDITY_DOMAIN * const __restrict__
 	/*********************************************************************************\
 	 * Second order inverse Reynolds numbers
 	/*********************************************************************************/
-#ifdef PIMUNU
+
 	double a = pl/e_s;
 	double a2 = a*a;
 	double a3 = a2*a;
@@ -322,6 +324,7 @@ void checkValidityKernel(PRECISION t, const VALIDITY_DOMAIN * const __restrict__
 	double tau_pipi = 4*(delta_pipi-1/2)/3;
 	double lambda_pipi = Rgamma-1;
 
+#ifdef PIMUNU
 	PRECISION I2tt = thetaT * pitt;
 	PRECISION I2tx = thetaT * pitx;
 	PRECISION I2ty = thetaT * pity;
@@ -389,8 +392,8 @@ void checkValidityKernel(PRECISION t, const VALIDITY_DOMAIN * const __restrict__
 #ifdef PI
 	double zeta_z = (Rhat-Rbar0)*(e_s-3*p_s)/3;
 	double zeta_T = -(Rbar0+Rhat)*(e_s-3*p_s)/6;
-	PRECISION J = - beta_PiPi * Pi * zDzu - delta_PiPi * Pi * thetaT + lambda_Pipi * ps;
-	v->RPi2[s] = fabsf(J / (- zeta_z*zDzu -zeta_T*thetaT));
+	//PRECISION J = - beta_PiPi * Pi * zDzu - delta_PiPi * Pi * thetaT + lambda_Pipi * ps;
+	//v->RPi2[s] = fabsf(J / (- zeta_z*zDzu -zeta_T*thetaT));
 #endif
 }
 

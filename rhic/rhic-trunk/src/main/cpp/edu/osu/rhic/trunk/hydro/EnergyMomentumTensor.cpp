@@ -44,8 +44,10 @@ int fullTimeStepInversion
 
 	for(int j = 0; j < MAX_ITERS; ++j) {
 		double e = MB0 - t*Ft*MB3 - uT0/sqrt(1 + uT0*uT0)*x*MBT;
+		if (isnan(e)) printf("found e nan inside transverseFluid...() \n");
 		if(e < 0.0) return -1;
 		double p = equilibriumPressure(e);
+		if (isnan(p)) printf("found p nan inside transverseFluid...() \n");
 		double PtHat = 0.5*(e-PL);
 		double Pt = PtHat + 1.5*Pi;
 
@@ -163,6 +165,7 @@ int fullTimeStepInversion
 	}	else {
 		*e = ePrev*.999;
 		*p = equilibriumPressure(*e);
+		if (isnan(*p)) printf("found p nan inside get inferred variables  \n");
 		*ux=0.0;
 		*uy=0.0;
 //		*un = F/x;

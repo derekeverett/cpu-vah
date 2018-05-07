@@ -50,6 +50,7 @@ void swapAndSetHydroVariables(double ****energy_density_evoution, double *****hy
                               CONSERVED_VARIABLES * const __restrict__ q, PRECISION * const __restrict__ e,
                               FLUID_VELOCITY * const __restrict__ u, int nx, int ny, int nz, int FOFREQ)
 {
+#pragma omp parallel for collapse(3)
   for (int ix = 2; ix < nx+2; ix++)
   {
     for (int iy = 2; iy < ny+2; iy++)
@@ -120,6 +121,7 @@ void setHydroVariables(double ****energy_density_evoution, double *****hydrodyna
                               FLUID_VELOCITY * const __restrict__ u, int nx, int ny, int nz, int FOFREQ, int n)
 {
   int nFO = n % FOFREQ;
+#pragma omp parallel for collapse(3)
   for (int ix = 2; ix < nx+2; ix++)
   {
     for (int iy = 2; iy < ny+2; iy++)

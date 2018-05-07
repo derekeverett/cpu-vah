@@ -550,7 +550,7 @@ VALIDITY_DOMAIN * const __restrict__ validityDomain
 				// Longitudinal pressure regularization
 				//===================================================
 				double eps=1.e-7;
-				if(e[s]<0.0) {
+				if(e[s]<eps) {
 					e[s] = 1.e-7;
 					p[s] = 1.e-7;
 				}
@@ -559,14 +559,11 @@ VALIDITY_DOMAIN * const __restrict__ validityDomain
 //				if(currrentVars->pl[s] > 3*P) currrentVars->pl[s] = 3*P;
 //				if(currrentVars->pl[s] > e[s]) currrentVars->pl[s] = e[s]*(1.0-1.e-5);
 
+				//PRECISION xi0 = 1.0;
+				//PRECISION rhomax = 10.0;
+
 				PRECISION xi0 = 0.1;
 				PRECISION rhomax = 1.0;
-
-//xi0=1.0;
-//rhomax=10.0;
-
-xi0=1.0;
-rhomax=1.0;
 
 				PRECISION e_s = e[s];
 				PRECISION p_s = p[s];
@@ -574,9 +571,9 @@ rhomax=1.0;
 				double ptHat = transversePressureHat(e_s, p_s, pl);
 
 //===============================REGULARIZATION ON PL=============================================//
-//double rhoL = fabs(pl/0.1/e_s);
-//double facL = tanh(rhoL)/rhoL; if(rhoL<1.e-7) facL=1.0;
-//currrentVars->pl[s] *= facL;
+				//double rhoL = fabs(pl/0.1/e_s);
+				//double facL = tanh(rhoL)/rhoL; if(rhoL<1.e-7) facL=1.0;
+				//currrentVars->pl[s] *= facL;
 //===============================END REGULARIZATION ON PL=========================================//
 
 				//===================================================

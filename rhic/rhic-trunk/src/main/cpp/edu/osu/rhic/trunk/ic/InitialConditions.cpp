@@ -837,9 +837,9 @@ void setMCGlauberInitialCondition(void * latticeParams, void * initCondParams) {
 
 	double e0 = initCond->initialEnergyDensity;
 //	double T0 = 3.05;
-	double T0 = 2.03;
+//	double T0 = 2.03;
 //	e0 *= pow(T0,4);
-	e0 = (double) equilibriumEnergyDensity(T0);
+//	e0 = (double) equilibriumEnergyDensity(T0);
 
 	double eT[nx*ny], eL[nz];
 	monteCarloGlauberEnergyDensityTransverseProfile(eT, nx, ny, dx, dy, initCondParams);
@@ -873,9 +873,9 @@ void setMCGlauberInitialCondition_FromMS_1d(void * latticeParams, void * initCon
 
 	double e0 = initCond->initialEnergyDensity;
 //	double T0 = 3.05;
-	double T0 = 2.03;
+//	double T0 = 2.03;
 //	e0 *= pow(T0,4);
-	e0 = (double) equilibriumEnergyDensity(T0);
+//	e0 = (double) equilibriumEnergyDensity(T0);
 
 double T [201] = {0.00060000018076032,0.00060000018076032,0.00060000018076032,0.00060000018076032,0.00060000018076032,0.00060000018076032,
    0.00060000018076032,0.00060000018076032,0.00060000018076032,0.00060000018076032,0.00060000018076032,0.00060000018076032,
